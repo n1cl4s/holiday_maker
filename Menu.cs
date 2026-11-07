@@ -1,14 +1,12 @@
-using MySqlConnector;
-
 public class Menu
 {
-    private readonly Database database;
     private readonly CustomerDb customerDb;
+        private readonly RoomDb roomDb;
 
     public Menu(Database database)
     {
-        this.database = database;
         customerDb = new CustomerDb(database);
+        roomDb = new RoomDb(database);
     }
 
     public void Run()
@@ -48,21 +46,11 @@ public class Menu
 
     private void ShowRooms()
     {
-        string sql = """
-            SELECT a.name AS hotel, r.rooms_number, r.capacity, r.price_per_night
-            FROM Rooms AS r
-            INNER JOIN Accomodations AS a
-                ON r.accomodation_id = a.id
-            ORDER BY a.name, r.rooms_number;
-            """;
+        List<Room> rooms = roomDb.GetAll();
 
-        using MySqlConnection connection = database.OpenConnection();
-        using MySqlCommand command = new MySqlCommand(sql, connection);
-        using MySqlDataReader reader = command.ExecuteReader();
-
-        while (reader.Read())
+        foreach (Room room in rooms)
         {
-            Console.WriteLine($"{reader.GetString("hotel")} – rum {reader.GetInt32("rooms_number")}, {reader.GetInt32("capacity")} pers, {reader.GetInt32("price_per_night")} kr");
+            Console.WriteLine($"{room.Hotel}, {room.City} - rum {room.RoomNumber}, Max antal personer: {room.Capacity}, Pris: {room.PricePerNight} kr");
         }
     }
 }
