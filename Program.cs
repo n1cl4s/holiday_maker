@@ -6,12 +6,14 @@ using MySqlConnection connection = new MySqlConnection(connectionString);
 
 connection.Open();
 
-// Is the database connected?
-// Yes it was
-Console.WriteLine("Ansluten till databasen!");
+using MySqlCommand command = new MySqlCommand("SELECT id, name FROM Customers ORDER BY name;", connection);
 
-// How many customers is it in the database? Should be 5
-// It was 5. Great!
-using MySqlCommand command = new MySqlCommand("SELECT COUNT(*) FROM Customers;", connection);
-object? result = command.ExecuteScalar();
-Console.WriteLine($"Antal kunder: {result}");
+using MySqlDataReader reader = command.ExecuteReader();
+
+
+while (reader.Read())
+{
+    Console.WriteLine($"{reader.GetInt32("id")}. {reader.GetString("name")}");
+}
+
+
