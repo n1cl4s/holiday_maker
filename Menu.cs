@@ -3,10 +3,12 @@ using MySqlConnector;
 public class Menu
 {
     private readonly Database database;
+    private readonly CustomerDb customerDb;
 
     public Menu(Database database)
     {
         this.database = database;
+        customerDb = new CustomerDb(database);
     }
 
     public void Run()
@@ -36,13 +38,11 @@ public class Menu
 
     private void ShowCustomers()
     {
-        using MySqlConnection connection = database.OpenConnection();
-        using MySqlCommand command = new MySqlCommand("SELECT id, name FROM Customers ORDER BY name;", connection);
-        using MySqlDataReader reader = command.ExecuteReader();
+        List <Customer> customers = customerDb.GetAll();
 
-        while (reader.Read())
+        foreach (Customer customer in customers)
         {
-            Console.WriteLine($"{reader.GetInt32("id")}. {reader.GetString("name")}");
+            Console.WriteLine($"{customer.Id}. {customer.Name} ({customer.Email}) ");
         }
     }
 
