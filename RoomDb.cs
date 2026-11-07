@@ -1,5 +1,6 @@
 using MySqlConnector;
 
+// Handles all SQL queries for rooms.
 public class RoomDb
 {
     private readonly Database database;
@@ -12,6 +13,9 @@ public class RoomDb
     public List <Room> GetAll()
     {
         List<Room> rooms = new List<Room>();
+
+        // Joins Accomodations and Cities to get hotel name and city for each room.
+        // Aliases inspired by the book "Prata med data"
 
         string sql = """
         SELECT r.id, a.name AS hotel, c.name AS city, r.rooms_number, r.capacity, r.price_per_night, a.rating

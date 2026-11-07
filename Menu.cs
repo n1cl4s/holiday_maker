@@ -1,7 +1,8 @@
 public class Menu
 {
     private readonly CustomerDb customerDb;
-        private readonly RoomDb roomDb;
+    private readonly RoomDb roomDb;
+     private Customer? selectedCustomer;
 
     public Menu(Database database)
     {
@@ -9,22 +10,31 @@ public class Menu
         roomDb = new RoomDb(database);
     }
 
+    // Shows the main menu until the user chooses to exit.
     public void Run()
     {
         while (true)
         {
             Console.WriteLine();
-            Console.WriteLine("* Holiday Maker *");
-            Console.WriteLine("Visa befintliga");
-            Console.WriteLine("1. Kunder");
+            Console.WriteLine("* Holiday Maker *\n");
+            if (selectedCustomer == null)
+            {
+                Console.WriteLine("Ingen kund vald\n");
+            }
+            else
+            {
+                Console.WriteLine($"{selectedCustomer.Name} vald\n");
+            }
+            
+            Console.WriteLine("1. Välj kunder");
             Console.WriteLine("2. Rum");
             Console.WriteLine("0. Avsluta");
-            Console.Write("Val: ");
+            Console.Write("Val:");
 
             string choice = Console.ReadLine() ?? "";
 
             if (choice == "1")
-                ShowCustomers();
+                SelectCustomer();
             else if (choice == "2")
                 ShowRooms();
             else if (choice == "0")
@@ -52,5 +62,27 @@ public class Menu
         {
             Console.WriteLine($"{room.Hotel}, {room.City} - rum {room.RoomNumber}, Max antal personer: {room.Capacity}, Pris: {room.PricePerNight} kr");
         }
+    }
+
+    private void SelectCustomer()
+    {
+        ShowCustomers();
+        Console.Write("\nAnge kundens id: ");
+
+        if(!int.TryParse(Console.ReadLine(), out int id))
+        {
+            Console.WriteLine("\nOgiltigt id, skriv i en siffra");
+            return;
+        }
+        Customer? customer = customerDb.GetById(id);
+
+        if(customer == null)
+        {
+            Console.WriteLine($"\nDet finns ingen kund med angivet id: {id}");
+            return;
+        }
+
+        selectedCustomer = customer;
+
     }
 }
