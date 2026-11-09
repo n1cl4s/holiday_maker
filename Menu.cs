@@ -16,27 +16,32 @@ public class Menu
         while (true)
         {
             Console.WriteLine();
-            Console.WriteLine("* Holiday Maker *\n");
-            if (selectedCustomer == null)
-            {
-                Console.WriteLine("Ingen kund vald\n");
-            }
-            else
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("## Holiday Maker ## \n");
+        Console.ResetColor();
+        Console.WriteLine("* Operator mode *\n");
+
+            if (selectedCustomer != null)
             {
                 Console.WriteLine($"{selectedCustomer.Name} vald\n");
             }
             
-            Console.WriteLine("1. Välj kunder");
-            Console.WriteLine("2. Rum");
+            Console.WriteLine("1. Visa kunder");
+            Console.WriteLine("2. Visa rum");
+            Console.WriteLine("3. Välj kund");
             Console.WriteLine("0. Avsluta");
-            Console.Write("Val:");
+            Console.Write("Val: ");
 
             string choice = Console.ReadLine() ?? "";
+            Console.WriteLine("");
 
             if (choice == "1")
-                SelectCustomer();
+                ShowCustomers();
             else if (choice == "2")
                 ShowRooms();
+            else if (choice == "3")
+                SelectCustomer();
             else if (choice == "0")
                 break;
             else
