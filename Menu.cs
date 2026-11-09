@@ -1,3 +1,4 @@
+using MySqlConnector;
 public class Menu
 {
     private readonly CustomerDb customerDb;
@@ -30,6 +31,7 @@ public class Menu
             Console.WriteLine("1. Visa kunder");
             Console.WriteLine("2. Visa rum");
             Console.WriteLine("3. Välj kund");
+            Console.WriteLine("4. Registrera kund");
             Console.WriteLine("0. Avsluta");
             Console.Write("Val: ");
 
@@ -38,12 +40,19 @@ public class Menu
 
             if (choice == "1")
                 ShowCustomers();
+
             else if (choice == "2")
                 ShowRooms();
+
             else if (choice == "3")
                 SelectCustomer();
+
+            else if (choice == "4")
+                RegisterCustomer();
+
             else if (choice == "0")
                 break;
+
             else
                 Console.WriteLine("Ogiltigt val.");
         }
@@ -88,6 +97,44 @@ public class Menu
         }
 
         selectedCustomer = customer;
+
+    }
+
+    private void RegisterCustomer()
+    {
+        Console.Write("Namn: ");
+        string name = Console.ReadLine() ?? "";
+
+        Console.Write("E-mail: ");
+        string email = Console.ReadLine() ?? "";
+
+        Console.Write("Telefonnummer: ");
+        string tele = Console.ReadLine() ?? "";
+
+        if (name == "" || email == "" || tele == "")
+        {
+            Console.WriteLine("Du missade att fylla i alla fält");
+            return;
+        }
+
+        // The database does not allow two customers with the same email or phone.
+        // The try/catch takes care of it if it happens
+
+        int newCustomerId;
+
+        try
+        {
+            newCustomerId = customerDb.Add(name, email, tele);
+        }
+        catch (MySqlException)
+        {
+            Console.WriteLine("E-post eller telefonnumer finns redan registrerad på en annan användare");
+            return;
+        }
+
+        selectedCustomer = customerDb.GetById(newCustomerId);
+        Console.WriteLine($"\n{name} är registrerad och vald");
+
 
     }
 }

@@ -15,7 +15,7 @@ public class CustomerDb
         List<Customer> customers = new List<Customer>();
 
         using MySqlConnection connection = database.OpenConnection();
-        using MySqlCommand command = new MySqlCommand("SELECT id, name, email, tele FROM Customers", connection);
+        using MySqlCommand command = new MySqlCommand("SELECT id, name, email, tele FROM Customers ORDER BY name", connection);
         using MySqlDataReader reader = command.ExecuteReader();
     
         while (reader.Read())
@@ -32,6 +32,7 @@ public class CustomerDb
 
    
     
+     // Returns null if no customer with the given id exists.
     public Customer? GetById (int id)
     {
         using MySqlConnection connection = database.OpenConnection();
@@ -39,7 +40,7 @@ public class CustomerDb
         command.Parameters.AddWithValue("@id", id);
         using MySqlDataReader reader = command.ExecuteReader();
 
-        // Returns null if no customer with the given id exists.
+       
         if (!reader.Read())
         {
             return null;
@@ -51,5 +52,18 @@ public class CustomerDb
         customer.Email = reader.GetString("email");
         customer.Tele = reader.GetString("tele");
         return customer;
+    }
+
+    public int Add(string name, string  email, string tele)
+    {
+        using MySqlConnection connection = database.OpenConnection();
+        using MySqlCommand command = new MySqlCommand
+            ("INSERT INTO Customers (name, email, tele) VALUES (@name, @email, @tele);", connection);
+            command.Parameters.AddWithValue("@name", name);
+            command.Parameters.AddWithValue("@email", email);
+            command.Parameters.AddWithValue("@tele", tele);
+            command.ExecuteNonQuery();
+
+            return (int)command.LastInsertedId;
     }
 }
