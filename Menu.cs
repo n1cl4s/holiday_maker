@@ -32,6 +32,7 @@ public class Menu
             Console.WriteLine("2. Visa rum");
             Console.WriteLine("3. Välj kund");
             Console.WriteLine("4. Registrera kund");
+            Console.WriteLine("5. Sök lediga rum");
             Console.WriteLine("0. Avsluta");
             Console.Write("Val: ");
 
@@ -49,6 +50,9 @@ public class Menu
 
             else if (choice == "4")
                 RegisterCustomer();
+
+            else if (choice == "5")
+                SearchRooms();
 
             else if (choice == "0")
                 break;
@@ -135,6 +139,61 @@ public class Menu
         selectedCustomer = customerDb.GetById(newCustomerId);
         Console.WriteLine($"\n{name} är registrerad och vald");
 
+
+    }
+
+    private void SearchRooms()
+    {
+        Console.Write("Ort: ");
+        string city = Console.ReadLine() ?? "";
+
+        Console.Write("Incheckning (ÅÅÅÅ-MM-DD): ");
+        if (!DateTime.TryParse(Console.ReadLine(), out DateTime checkIn))
+        {
+            Console.WriteLine("Ogiltigt datum");
+            return;
+        }
+
+        Console.Write("Utcheckning (ÅÅÅÅ-MM-DD): ");
+        if (!DateTime.TryParse(Console.ReadLine(), out DateTime checkOut))
+        {
+            Console.WriteLine("Ogiltigt datum");
+            return;
+        }
+
+        if (checkOut <= checkIn)
+        {
+            Console.WriteLine("Datum för utcheckning måste ligga efter incheckning");
+            return;
+        }
+
+        if (checkIn < DateTime.Today)
+        {
+            Console.WriteLine("Incheckningsdatum måste vara framåt i tiden");
+            return;
+        }
+
+        Console.Write("Antal personer: ");
+        if (!int.TryParse(Console.ReadLine(), out int guests) || guests < 1)
+        {
+            Console.WriteLine("Ogiltigt antal personer");
+            return;
+        }
+
+        List<Room> rooms = roomDb.Search(city, checkIn, checkOut, guests);
+
+        if (rooms.Count == 0)
+        {
+            Console.WriteLine("\nInga lediga rum hittades");
+            return;
+        }
+
+        Console.WriteLine();
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            Room room = rooms[i];
+            Console.WriteLine($"{i + 1}. {room.Hotel}, {room.City} - rum {room.RoomNumber}, {room.Capacity} pers, {room.PricePerNight} kr/natt");
+        }
 
     }
 }
