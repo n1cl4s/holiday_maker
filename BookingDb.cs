@@ -89,4 +89,21 @@ public class BookingDb
         return bookings;
     }
 
+    public bool Delete(int bookingId, int customerId)
+    {
+        string sql = """
+        DELETE FROM Bookings
+        WHERE id = @bookingId
+        AND customer_id = @customerId;
+        """;
+
+        using MySqlConnection connection = database.OpenConnection();
+        using MySqlCommand command = new MySqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@bookingId", bookingId);
+        command.Parameters.AddWithValue("@customerId", customerId);
+
+        int rowsDeleted = command.ExecuteNonQuery();
+        return rowsDeleted == 1;
+    }
+
 }

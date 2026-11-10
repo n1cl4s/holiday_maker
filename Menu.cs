@@ -1,10 +1,11 @@
 using MySqlConnector;
+
 public class Menu
 {
     private readonly CustomerDb customerDb;
     private readonly RoomDb roomDb;
-    private BookingDb bookingDb;
-     private Customer? selectedCustomer;
+    private readonly BookingDb bookingDb;
+    private Customer? selectedCustomer;
 
     public Menu(Database database)
     {
@@ -18,29 +19,36 @@ public class Menu
     {
         while (true)
         {
+            // Clear the terminal
+            Console.Clear();
+
             Console.WriteLine();
 
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("## Holiday Maker ## \n");
-        Console.ResetColor();
-        Console.WriteLine("* Operator mode *\n");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("## Holiday Maker ## \n");
+            Console.ResetColor();
+            Console.WriteLine("* Operator mode *\n");
 
             if (selectedCustomer != null)
             {
                 Console.WriteLine($"{selectedCustomer.Name} vald\n");
             }
-            
+
             Console.WriteLine("1. Visa kunder");
             Console.WriteLine("2. Visa rum");
             Console.WriteLine("3. Välj kund");
             Console.WriteLine("4. Registrera kund");
-            Console.WriteLine("5. Sök lediga rum");
+            Console.WriteLine("5. Sök och boka rum");
             Console.WriteLine("6. Visa kundens bokningar");
+            Console.WriteLine("7. Avboka");
             Console.WriteLine("0. Avsluta");
             Console.Write("Val: ");
 
             string choice = Console.ReadLine() ?? "";
-            Console.WriteLine("");
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("## Holiday Maker ## \n");
+            Console.ResetColor();
 
             if (choice == "1")
                 ShowCustomers();
@@ -49,28 +57,37 @@ public class Menu
                 ShowRooms();
 
             else if (choice == "3")
-                SelectCustomer();
+      {        
+         if (SelectCustomer())
+                    continue;
+            }
 
             else if (choice == "4")
                 RegisterCustomer();
 
             else if (choice == "5")
                 SearchRooms();
-            
+
             else if (choice == "6")
                 ShowBookings();
+
+            else if (choice == "7")
+                CancelBooking();
 
             else if (choice == "0")
                 break;
 
             else
                 Console.WriteLine("Ogiltigt val.");
+
+                // Stops the screen so the user can see what happened after their choice
+                Console.ReadKey();
         }
     }
 
     private void ShowCustomers()
     {
-        List <Customer> customers = customerDb.GetAll();
+        List<Customer> customers = customerDb.GetAll();
 
         foreach (Customer customer in customers)
         {
@@ -88,6 +105,7 @@ public class Menu
         }
     }
 
+    // Shows all bookings for the selected customer.
     private void ShowBookings()
     {
         if (selectedCustomer == null)
@@ -111,26 +129,51 @@ public class Menu
         }
     }
 
-    private void SelectCustomer()
+    // Cancels one of the selected customer's bookings.
+    private void CancelBooking()
+    {
+        if (selectedCustomer == null)
+        {
+            Console.WriteLine("\nVälj en kund först.");
+            return;
+        }
+
+        ShowBookings();
+
+        Console.Write("\nAnge bokningsnummer på bokningen du vill avboka: ");
+        int bookingId = int.Parse(Console.ReadLine()!);
+
+        if (bookingDb.Delete(bookingId, selectedCustomer.Id))
+        {
+            Console.WriteLine("Bokningen är avbokad");
+        }
+        else
+        {
+            Console.WriteLine("Kunden innehar inte denna bokning");
+        }
+    }
+
+    private bool SelectCustomer()
     {
         ShowCustomers();
         Console.Write("\nAnge kundens id: ");
 
-        if(!int.TryParse(Console.ReadLine(), out int id))
+        if (!int.TryParse(Console.ReadLine(), out int id))
         {
             Console.WriteLine("\nOgiltigt id, skriv i en siffra");
-            return;
+            return false;
         }
+
         Customer? customer = customerDb.GetById(id);
 
-        if(customer == null)
+        if (customer == null)
         {
             Console.WriteLine($"\nDet finns ingen kund med angivet id: {id}");
-            return;
+            return false;
         }
 
         selectedCustomer = customer;
-
+        return true;
     }
 
     private void RegisterCustomer()
@@ -167,8 +210,6 @@ public class Menu
 
         selectedCustomer = customerDb.GetById(newCustomerId);
         Console.WriteLine($"\n{name} är registrerad och vald");
-
-
     }
 
     private void SearchRooms()
@@ -226,15 +267,16 @@ public class Menu
 
         if (selectedCustomer == null)
         {
-            Console.WriteLine("\n Välj en kund först för att kunna boka");
+            Console.WriteLine("\nVälj en kund först för att kunna boka");
             return;
         }
 
         Console.Write("\nVälj rum att boka: ");
         int roomChoice = int.Parse(Console.ReadLine()!);
 
-        Room selectedRoom = rooms[roomChoice -1];
+        Room selectedRoom = rooms[roomChoice - 1];
 
+        // Check availability again right before saving.
         if (!bookingDb.BookableRoom(selectedRoom.Id, checkIn, checkOut))
         {
             Console.WriteLine("Rummet är inte längre ledigt");
@@ -243,7 +285,7 @@ public class Menu
 
         int bookingId = bookingDb.Create(selectedCustomer.Id, selectedRoom.Id, checkIn, checkOut, guests);
 
-        int nights = (checkOut- checkIn).Days;
+        int nights = (checkOut - checkIn).Days;
         int totalPrice = nights * selectedRoom.PricePerNight;
 
         Console.WriteLine($"\nBokning bekräftad! Bokningsnummer: {bookingId}");
