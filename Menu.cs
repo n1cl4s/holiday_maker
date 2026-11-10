@@ -3,12 +3,14 @@ public class Menu
 {
     private readonly CustomerDb customerDb;
     private readonly RoomDb roomDb;
+    private BookingDb bookingDb;
      private Customer? selectedCustomer;
 
     public Menu(Database database)
     {
         customerDb = new CustomerDb(database);
         roomDb = new RoomDb(database);
+        bookingDb = new BookingDb(database);
     }
 
     // Shows the main menu until the user chooses to exit.
@@ -33,6 +35,7 @@ public class Menu
             Console.WriteLine("3. Välj kund");
             Console.WriteLine("4. Registrera kund");
             Console.WriteLine("5. Sök lediga rum");
+            Console.WriteLine("6. Visa kundens bokningar");
             Console.WriteLine("0. Avsluta");
             Console.Write("Val: ");
 
@@ -53,6 +56,9 @@ public class Menu
 
             else if (choice == "5")
                 SearchRooms();
+            
+            else if (choice == "6")
+                ShowBookings();
 
             else if (choice == "0")
                 break;
@@ -79,6 +85,29 @@ public class Menu
         foreach (Room room in rooms)
         {
             Console.WriteLine($"{room.Hotel}, {room.City} - rum {room.RoomNumber}, Max antal personer: {room.Capacity}, Pris: {room.PricePerNight} kr");
+        }
+    }
+
+    private void ShowBookings()
+    {
+        if (selectedCustomer == null)
+        {
+            Console.WriteLine("\nVälj en kund först.");
+            return;
+        }
+
+        List<Booking> bookings = bookingDb.GetByCustomer(selectedCustomer.Id);
+
+        if (bookings.Count == 0)
+        {
+            Console.WriteLine("\nKunden har inga bokningar");
+            return;
+        }
+
+        Console.WriteLine($"\nBokningar för {selectedCustomer.Name}:");
+        foreach (Booking booking in bookings)
+        {
+            Console.WriteLine($"#{booking.Id} {booking.Hotel}, rum {booking.RoomNumber}, {booking.CheckIn:yyyy-MM-dd} till {booking.CheckOut:yyyy-MM-dd}, {booking.Guests} pers, {booking.TotalPrice} kr");
         }
     }
 
@@ -195,5 +224,30 @@ public class Menu
             Console.WriteLine($"{i + 1}. {room.Hotel}, {room.City} - rum {room.RoomNumber}, {room.Capacity} pers, {room.PricePerNight} kr/natt");
         }
 
+        if (selectedCustomer == null)
+        {
+            Console.WriteLine("\n Välj en kund först för att kunna boka");
+            return;
+        }
+
+        Console.Write("\nVälj rum att boka: ");
+        int roomChoice = int.Parse(Console.ReadLine()!);
+
+        Room selectedRoom = rooms[roomChoice -1];
+
+        if (!bookingDb.BookableRoom(selectedRoom.Id, checkIn, checkOut))
+        {
+            Console.WriteLine("Rummet är inte längre ledigt");
+            return;
+        }
+
+        int bookingId = bookingDb.Create(selectedCustomer.Id, selectedRoom.Id, checkIn, checkOut, guests);
+
+        int nights = (checkOut- checkIn).Days;
+        int totalPrice = nights * selectedRoom.PricePerNight;
+
+        Console.WriteLine($"\nBokning bekräftad! Bokningsnummer: {bookingId}");
+        Console.WriteLine($"{selectedRoom.Hotel}, rum {selectedRoom.RoomNumber}, {nights} nätter");
+        Console.WriteLine($"Totalpris: {totalPrice} kr");
     }
 }
