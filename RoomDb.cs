@@ -52,22 +52,21 @@ public class RoomDb
     List<Room> rooms = new List<Room>();
 
     string sql = """
-        SELECT r.id, a.name AS hotel, c.name AS city, r.rooms_number, r.capacity, r.price_per_night, a.rating
-        FROM Rooms AS r
-        INNER JOIN Accomodations AS a
-            ON r.accomodation_id = a.id
-        INNER JOIN Cities AS c
-            ON a.city_id = c.id
-        WHERE c.name = @city
-            AND r.capacity >= @guests
-            AND r.id NOT IN (
-            SELECT room_id
-            FROM Bookings
-            WHERE booking_start < @checkOut
-                AND booking_end > @checkIn
+        SELECT id, hotel, city, rooms_number, capacity, price_per_night, rating
+        FROM RoomDetails
+        WHERE city = @city
+        AND capacity >= @guests
+        AND id NOT IN
+        (
+        SELECT room_id
+        FROM Bookings
+        WHERE booking_start < @checkOut
+            AND booking_end > @checkIn
         )
-        ORDER BY r.price_per_night;
+        ORDER BY price_per_night;   
         """;
+
+
 
     using MySqlConnection connection = database.OpenConnection();
     using MySqlCommand command = new MySqlCommand(sql, connection);
