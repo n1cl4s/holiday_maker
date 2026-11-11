@@ -9,7 +9,7 @@ public class BookingDb
         this.database = database;
     }
 
-    public bool BookableRoom(int roomId, DateTime checkIn, DateTime checkOut)
+    public async Task<bool> BookableRoom(int roomId, DateTime checkIn, DateTime checkOut)
     {
         string sql = """
         SELECT COUNT(*)
@@ -19,19 +19,19 @@ public class BookingDb
         AND booking_end > @checkIn;
         """;
 
-        using MySqlConnection connection = database.OpenConnection();
+        await using MySqlConnection connection = await database.OpenConnection();
         using MySqlCommand command = new MySqlCommand(sql, connection);
         command.Parameters.AddWithValue("@roomId", roomId);
         command.Parameters.AddWithValue("@checkIn", checkIn);
         command.Parameters.AddWithValue("@checkOut", checkOut);
 
-        int overlaps = Convert.ToInt32(command.ExecuteScalar());
+        int overlaps = Convert.ToInt32(await command.ExecuteScalarAsync());
         return overlaps == 0;
 
     }
 
 
-    public int Create(int customerId, int roomId, DateTime checkIn, DateTime checkOut, int guests)
+    public async Task<int> Create(int customerId, int roomId, DateTime checkIn, DateTime checkOut, int guests)
 
     {
         string sql = """
@@ -40,21 +40,21 @@ public class BookingDb
         """;
 
 
-        using MySqlConnection connection = database.OpenConnection();
+        await using MySqlConnection connection = await database.OpenConnection();
         using MySqlCommand command = new MySqlCommand(sql, connection);
         command.Parameters.AddWithValue("@customerId", customerId);
         command.Parameters.AddWithValue("@roomId", roomId);
         command.Parameters.AddWithValue("@checkIn", checkIn);
         command.Parameters.AddWithValue("@checkOut", checkOut);
         command.Parameters.AddWithValue("@guests", guests);
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync();
 
         return (int)command.LastInsertedId;
     }
 
     
 
-    public List<Booking> GetByCustomer(int customerId)
+    public async Task<List<Booking>> GetByCustomer(int customerId)
     {
         string sql = """
         SELECT b.id, a.name AS hotel, r.rooms_number, b.booking_start, b.booking_end, b.guests_count,
@@ -68,12 +68,12 @@ public class BookingDb
 
         List<Booking> bookings = new List<Booking>();
 
-        using MySqlConnection connection = database.OpenConnection();
+        await using MySqlConnection connection = await database.OpenConnection();
         using MySqlCommand command = new MySqlCommand(sql, connection);
         command.Parameters.AddWithValue("@customerId", customerId);
 
-        using MySqlDataReader reader = command.ExecuteReader();
-        while (reader.Read())
+        await using MySqlDataReader reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
         {
             Booking booking = new Booking();
             booking.Id = reader.GetInt32("id");
@@ -89,7 +89,7 @@ public class BookingDb
         return bookings;
     }
 
-    public bool Delete(int bookingId, int customerId)
+    public async Task<bool> Delete(int bookingId, int customerId)
     {
         string sql = """
         DELETE FROM Bookings
@@ -97,16 +97,16 @@ public class BookingDb
         AND customer_id = @customerId;
         """;
 
-        using MySqlConnection connection = database.OpenConnection();
+        await using MySqlConnection connection = await database.OpenConnection();
         using MySqlCommand command = new MySqlCommand(sql, connection);
         command.Parameters.AddWithValue("@bookingId", bookingId);
         command.Parameters.AddWithValue("@customerId", customerId);
 
-        int rowsDeleted = command.ExecuteNonQuery();
+        int rowsDeleted = await command.ExecuteNonQueryAsync();
         return rowsDeleted == 1;
     }
 
-    public bool UpdateGuests(int bookingId, int customerId, int guests)
+    public async Task<bool> UpdateGuests(int bookingId, int customerId, int guests)
     {
         string sql = """
         UPDATE Bookings b
@@ -117,13 +117,13 @@ public class BookingDb
         AND r.capacity >= @guests;
         """;
 
-        using MySqlConnection connection = database.OpenConnection();
+        await using MySqlConnection connection = await database.OpenConnection();
         using MySqlCommand command = new MySqlCommand(sql, connection);
         command.Parameters.AddWithValue("@guests", guests);
         command.Parameters.AddWithValue("@bookingId", bookingId);
         command.Parameters.AddWithValue("@customerId", customerId);
 
-        int rowsUpdated = command.ExecuteNonQuery();
+        int rowsUpdated = await command.ExecuteNonQueryAsync();
         return rowsUpdated == 1;
 
     }

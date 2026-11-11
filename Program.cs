@@ -15,8 +15,8 @@ string connectionString = $"Server=localhost;Database=holiday_maker;User ID={use
 
 try
 {
-    using MySqlConnection test = new MySqlConnection(connectionString);
-    test.Open();
+    await using MySqlConnection test = new MySqlConnection(connectionString);
+    await test.OpenAsync();
     Console.Clear();
 
 }
@@ -28,4 +28,4 @@ catch (MySqlException)
 
 Database database = new Database(connectionString);
 Menu menu = new Menu(database);
-menu.Run();
+await menu.Run();

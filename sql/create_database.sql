@@ -37,10 +37,10 @@ create table Customers
     name  varchar(64)  not null,
     email varchar(128) not null,
     tele  varchar(32)  not null,
-    constraint Customers_tele_unique
-        unique (tele),
     constraint Customers_email_unique
-        unique (email)
+        unique (email),
+    constraint Customers_tele_unique
+        unique (tele)
 );
 
 create table Rooms
@@ -80,4 +80,20 @@ create table Bookings
     constraint Bookings_minimal_guests
         check (`guests_count` >= 1)
 );
+
+create view RoomDetails as
+select r.id,
+       a.name as hotel,
+       c.name as city,
+       r.rooms_number,
+       r.capacity,
+       r.price_per_night,
+       a.rating,
+       a.pool,
+       a.restaurant,
+       a.distance_to_beach,
+       a.distance_to_centrum
+from Rooms r
+join Accomodations a on r.accomodation_id = a.id
+join Cities c on a.city_id = c.id;
 

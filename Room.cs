@@ -1,10 +1,14 @@
-public class Room
+public record Room
 {
-    public int Id {get ; set;}
-    public string Hotel {get; set;} = "";
-    public string City {get; set;} ="";
-    public int RoomNumber {get ; set;}
-    public int Capacity {get ; set;}
-    public int Rating {get ; set;}
-    public int PricePerNight {get ; set;}
+    public int Id { get; init; }
+    public string Hotel { get; init; } = "";
+    public string City { get; init; } = "";
+    public int RoomNumber { get; init; }
+    public int Capacity { get; init; }
+    public int Rating { get; init; }
+    public int PricePerNight { get; init; }
+    public bool Pool { get; init; }
+    public bool Restaurant { get; init; }
+    public int DistanceToBeach { get; init; }
+    public int DistanceToCentrum { get; init; }
 }

@@ -9,10 +9,10 @@ public class Database
         this.connectionString = connectionString;
     }
 
-    public MySqlConnection OpenConnection()
+    public async Task<MySqlConnection> OpenConnection()
     {
         MySqlConnection connection = new MySqlConnection(connectionString);
-        connection.Open();
+        await connection.OpenAsync();
         return connection;
     }
 }

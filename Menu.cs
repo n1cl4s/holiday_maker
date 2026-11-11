@@ -15,14 +15,14 @@ public class Menu
     }
 
     // Shows the main menu until the user chooses to exit.
-    public void Run()
+    public async Task Run()
     {
-
-        Console.Clear();
         while (true)
         {
+            // Clears the screen and the scroll history before the menu is shown.
+            Console.Clear();
+            Console.Write("\x1b[3J");
 
-            
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("## Holiday Maker ## \n");
             Console.ResetColor();
@@ -45,56 +45,66 @@ public class Menu
             Console.Write("Val: ");
 
             string choice = Console.ReadLine() ?? "";
+
+            // Clears the menu so only the result of the choice is shown.
             Console.Clear();
+            Console.Write("\x1b[3J");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("## Holiday Maker ## \n");
             Console.ResetColor();
 
-            if (choice == "1")
-                ShowCustomers();
+            // Catches database errors so the program does not crash, for example if the database is down.
+            try
+            {
+                if (choice == "1")
+                    await ShowCustomers();
 
-            else if (choice == "2")
-                ShowRooms();
+                else if (choice == "2")
+                    await ShowRooms();
 
-            else if (choice == "3")
+                else if (choice == "3")
+                {
+                    // The user gets right back to the start menu when the customer is picked.
+                    // The menu shows which one is chosen.
+                    if (await SelectCustomer())
+                        continue;
+                }
 
-            // The user gets right back to the start menu when the customer is picked
-            // The menu shows which one i chosen
-            {        
-                if (SelectCustomer())
-                continue;
+                else if (choice == "4")
+                    await RegisterCustomer();
+
+                else if (choice == "5")
+                    await SearchRooms();
+
+                else if (choice == "6")
+                    await ShowBookings();
+
+                else if (choice == "7")
+                    await CancelBooking();
+
+                else if (choice == "8")
+                    await ChangeGuests();
+
+                else if (choice == "0")
+                    break;
+
+                else
+                    Console.WriteLine("Ogiltigt val.");
+            }
+            catch (MySqlException)
+            {
+                Console.WriteLine("\nNågot gick fel i kontakten med databasen. Kontrollera att databasen är igång och försök igen.");
             }
 
-            else if (choice == "4")
-                RegisterCustomer();
-
-            else if (choice == "5")
-                SearchRooms();
-
-            else if (choice == "6")
-                ShowBookings();
-
-            else if (choice == "7")
-                CancelBooking();
-
-            else if (choice == "8")
-                ChangeGuests();
-
-            else if (choice == "0")
-                break;
-                
-
-            else
-                Console.WriteLine("Ogiltigt val.");
-
-                // Stops the screen so the user can see what happened after their choice
-                Console.ReadKey();
+            // Stops the screen so the user can see what happened after their choice.
+            Console.Write("\nTryck på valfri tangent för att fortsätta...");
+            Console.ReadKey(true);
         }
     }
 
-    private void ShowCustomers()
+    private async Task ShowCustomers()
     {
-        List<Customer> customers = customerDb.GetAll();
+        List<Customer> customers = await customerDb.GetAll();
 
         foreach (Customer customer in customers)
         {
@@ -102,9 +112,9 @@ public class Menu
         }
     }
 
-    private void ShowRooms()
+    private async Task ShowRooms()
     {
-        List<Room> rooms = roomDb.GetAll();
+        List<Room> rooms = await roomDb.GetAll();
 
         foreach (Room room in rooms)
         {
@@ -113,7 +123,7 @@ public class Menu
     }
 
     // Shows all bookings for the selected customer.
-    private void ShowBookings()
+    private async Task ShowBookings()
     {
         if (selectedCustomer == null)
         {
@@ -121,7 +131,7 @@ public class Menu
             return;
         }
 
-        List<Booking> bookings = bookingDb.GetByCustomer(selectedCustomer.Id);
+        List<Booking> bookings = await bookingDb.GetByCustomer(selectedCustomer.Id);
 
         if (bookings.Count == 0)
         {
@@ -137,7 +147,7 @@ public class Menu
     }
 
     // Cancels one of the selected customer's bookings.
-    private void CancelBooking()
+    private async Task CancelBooking()
     {
         if (selectedCustomer == null)
         {
@@ -145,12 +155,16 @@ public class Menu
             return;
         }
 
-        ShowBookings();
+        await ShowBookings();
 
         Console.Write("\nAnge bokningsnummer på bokningen du vill avboka: ");
-        int bookingId = int.Parse(Console.ReadLine()!);
+        if (!int.TryParse(Console.ReadLine(), out int bookingId))
+        {
+            Console.WriteLine("Ogiltigt bokningsnummer");
+            return;
+        }
 
-        if (bookingDb.Delete(bookingId, selectedCustomer.Id))
+        if (await bookingDb.Delete(bookingId, selectedCustomer.Id))
         {
             Console.WriteLine("Bokningen är avbokad");
         }
@@ -160,7 +174,7 @@ public class Menu
         }
     }
 
-    private void ChangeGuests()
+    private async Task ChangeGuests()
     {
         if (selectedCustomer == null)
         {
@@ -168,7 +182,7 @@ public class Menu
             return;
         }
         
-        ShowBookings();
+        await ShowBookings();
 
         Console.Write("\nAnge bokningsnummer: ");
         if (!int.TryParse(Console.ReadLine(), out int bookingId))
@@ -184,7 +198,7 @@ public class Menu
             return;
         }
 
-        if (bookingDb.UpdateGuests(bookingId, selectedCustomer.Id, guests))
+        if (await bookingDb.UpdateGuests(bookingId, selectedCustomer.Id, guests))
         {
             Console.WriteLine("Antal personer är ändrat");
         }
@@ -194,9 +208,9 @@ public class Menu
         }
     }
 
-    private bool SelectCustomer()
+    private async Task<bool> SelectCustomer()
     {
-        ShowCustomers();
+        await ShowCustomers();
         Console.Write("\nAnge kundens id: ");
 
         if (!int.TryParse(Console.ReadLine(), out int id))
@@ -205,7 +219,7 @@ public class Menu
             return false;
         }
 
-        Customer? customer = customerDb.GetById(id);
+        Customer? customer = await customerDb.GetById(id);
 
         if (customer == null)
         {
@@ -217,7 +231,7 @@ public class Menu
         return true;
     }
 
-    private void RegisterCustomer()
+    private async Task RegisterCustomer()
     {
         Console.Write("Namn: ");
         string name = Console.ReadLine() ?? "";
@@ -247,7 +261,7 @@ public class Menu
 
         try
         {
-            newCustomerId = customerDb.Add(name, email, tele);
+            newCustomerId = await customerDb.Add(name, email, tele);
         }
         catch (MySqlException)
         {
@@ -255,11 +269,11 @@ public class Menu
             return;
         }
 
-        selectedCustomer = customerDb.GetById(newCustomerId);
+        selectedCustomer = await customerDb.GetById(newCustomerId);
         Console.WriteLine($"\n{name} är registrerad och vald");
     }
 
-    private void SearchRooms()
+    private async Task SearchRooms()
     {
         Console.Write("Ort: ");
         string city = Console.ReadLine() ?? "";
@@ -297,7 +311,24 @@ public class Menu
             return;
         }
 
-        List<Room> rooms = roomDb.Search(city, checkIn, checkOut, guests);
+        Console.Write("Måste ha pool? (j/n): ");
+        bool needPool = Console.ReadLine() == "j";
+
+        Console.Write("Måste ha restaurang? (j/n): ");
+        bool needRestaurant = Console.ReadLine() == "j";
+
+        // Enter or invalid input gives 0, which means no limit.
+        Console.Write("Max avstånd till strand i meter (Enter = inget krav): ");
+        int.TryParse(Console.ReadLine(), out int maxBeach);
+
+        Console.Write("Max avstånd till centrum i meter (Enter = inget krav): ");
+        int.TryParse(Console.ReadLine(), out int maxCentrum);
+
+        // Anything other than "o" sorts on price.
+        Console.Write("Sortera på pris eller omdöme? (p/o): ");
+        string sortBy = Console.ReadLine() == "o" ? "rating" : "price";
+
+        List<Room> rooms = await roomDb.Search(city, checkIn, checkOut, guests, needPool, needRestaurant, maxBeach, maxCentrum, sortBy);
 
         if (rooms.Count == 0)
         {
@@ -309,7 +340,11 @@ public class Menu
         for (int i = 0; i < rooms.Count; i++)
         {
             Room room = rooms[i];
+            string pool = room.Pool ? "Ja" : "Nej";
+            string restaurant = room.Restaurant ? "Ja" : "Nej";
+
             Console.WriteLine($"{i + 1}. {room.Hotel}, {room.City} - rum {room.RoomNumber}, {room.Capacity} pers, {room.PricePerNight} kr/natt");
+            Console.WriteLine($"   Omdöme: {room.Rating}/5 | Pool: {pool} | Restaurang: {restaurant} | Strand: {room.DistanceToBeach} m | Centrum: {room.DistanceToCentrum} m");
         }
 
         if (selectedCustomer == null)
@@ -318,19 +353,28 @@ public class Menu
             return;
         }
 
-        Console.Write("\nVälj rum att boka: ");
-        int roomChoice = int.Parse(Console.ReadLine()!);
+        Console.Write("\nVälj rum att boka (0 för att avbryta): ");
+        if (!int.TryParse(Console.ReadLine(), out int roomChoice) || roomChoice < 0 || roomChoice > rooms.Count)
+        {
+            Console.WriteLine("Ogiltigt val");
+            return;
+        }
+
+        if (roomChoice == 0)
+        {
+            return;
+        }
 
         Room selectedRoom = rooms[roomChoice - 1];
 
         // Check availability again right before saving.
-        if (!bookingDb.BookableRoom(selectedRoom.Id, checkIn, checkOut))
+        if (!await bookingDb.BookableRoom(selectedRoom.Id, checkIn, checkOut))
         {
             Console.WriteLine("Rummet är inte längre ledigt");
             return;
         }
 
-        int bookingId = bookingDb.Create(selectedCustomer.Id, selectedRoom.Id, checkIn, checkOut, guests);
+        int bookingId = await bookingDb.Create(selectedCustomer.Id, selectedRoom.Id, checkIn, checkOut, guests);
 
         int nights = (checkOut - checkIn).Days;
         int totalPrice = nights * selectedRoom.PricePerNight;

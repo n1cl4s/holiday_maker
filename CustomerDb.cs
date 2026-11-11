@@ -10,15 +10,15 @@ public class CustomerDb
         this.database = database;
     }
 
-    public List <Customer> GetAll()
+    public async Task<List<Customer>> GetAll()
     {
         List<Customer> customers = new List<Customer>();
 
-        using MySqlConnection connection = database.OpenConnection();
+        await using MySqlConnection connection = await database.OpenConnection();
         using MySqlCommand command = new MySqlCommand("SELECT id, name, email, tele FROM Customers ORDER BY name", connection);
-        using MySqlDataReader reader = command.ExecuteReader();
+        await using MySqlDataReader reader = await command.ExecuteReaderAsync();
     
-        while (reader.Read())
+        while (await reader.ReadAsync())
         {
             Customer customer = new Customer();
             customer.Id = reader.GetInt32("id");
@@ -33,15 +33,15 @@ public class CustomerDb
    
     
      // Returns null if no customer with the given id exists.
-    public Customer? GetById (int id)
+    public async Task<Customer?> GetById(int id)
     {
-        using MySqlConnection connection = database.OpenConnection();
+        await using MySqlConnection connection = await database.OpenConnection();
         using MySqlCommand command = new MySqlCommand("SELECT id, name, email, tele FROM Customers WHERE id = @id;", connection);
         command.Parameters.AddWithValue("@id", id);
-        using MySqlDataReader reader = command.ExecuteReader();
+        await using MySqlDataReader reader = await command.ExecuteReaderAsync();
 
        
-        if (!reader.Read())
+        if (!await reader.ReadAsync())
         {
             return null;
         }
@@ -54,15 +54,15 @@ public class CustomerDb
         return customer;
     }
 
-    public int Add(string name, string  email, string tele)
+    public async Task<int> Add(string name, string  email, string tele)
     {
-        using MySqlConnection connection = database.OpenConnection();
+        await using MySqlConnection connection = await database.OpenConnection();
         using MySqlCommand command = new MySqlCommand
             ("INSERT INTO Customers (name, email, tele) VALUES (@name, @email, @tele);", connection);
             command.Parameters.AddWithValue("@name", name);
             command.Parameters.AddWithValue("@email", email);
             command.Parameters.AddWithValue("@tele", tele);
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
 
             return (int)command.LastInsertedId;
     }

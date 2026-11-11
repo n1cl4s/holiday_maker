@@ -92,7 +92,7 @@
 7. För att kontrollera gå in på 6. Visa kundens bokningar och se så bokningen är borttagen
 
 
-### Ändra antal personer
+### Ändra antal personer på befintlig bokning
 1. Tryck 3 + enter
 2. Välj din en kund
 3. Kontrollera över menyn om rätt kund är vald
@@ -103,3 +103,6 @@
 6. Tryck valfri tangent för att komma tillbaka till menyn
 7. Välj 6. Visa kundens bokningar
 8. Kontrollera att personer har förändrats, men inte priset (då uppgiften var att antal personer inte påverkade priset)
+
+
+### Filtrera olika önskemål
