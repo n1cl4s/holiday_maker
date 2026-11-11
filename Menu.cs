@@ -17,13 +17,12 @@ public class Menu
     // Shows the main menu until the user chooses to exit.
     public void Run()
     {
+
+        Console.Clear();
         while (true)
         {
-            // Clear the terminal
-            Console.Clear();
 
-            Console.WriteLine();
-
+            
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("## Holiday Maker ## \n");
             Console.ResetColor();
@@ -41,6 +40,7 @@ public class Menu
             Console.WriteLine("5. Sök och boka rum");
             Console.WriteLine("6. Visa kundens bokningar");
             Console.WriteLine("7. Avboka");
+            Console.WriteLine("8. Ändra antal personer");
             Console.WriteLine("0. Avsluta");
             Console.Write("Val: ");
 
@@ -57,9 +57,12 @@ public class Menu
                 ShowRooms();
 
             else if (choice == "3")
-      {        
-         if (SelectCustomer())
-                    continue;
+
+            // The user gets right back to the start menu when the customer is picked
+            // The menu shows which one i chosen
+            {        
+                if (SelectCustomer())
+                continue;
             }
 
             else if (choice == "4")
@@ -74,8 +77,12 @@ public class Menu
             else if (choice == "7")
                 CancelBooking();
 
+            else if (choice == "8")
+                ChangeGuests();
+
             else if (choice == "0")
                 break;
+                
 
             else
                 Console.WriteLine("Ogiltigt val.");
@@ -153,6 +160,40 @@ public class Menu
         }
     }
 
+    private void ChangeGuests()
+    {
+        if (selectedCustomer == null)
+        {
+            Console.WriteLine("\nVälj en kund först");
+            return;
+        }
+        
+        ShowBookings();
+
+        Console.Write("\nAnge bokningsnummer: ");
+        if (!int.TryParse(Console.ReadLine(), out int bookingId))
+        {
+            Console.WriteLine("Ogitigt bokningsnummer");
+            return;
+        }
+
+        Console.Write("Nytt antal personer: ");
+        if (!int.TryParse(Console.ReadLine(), out int guests) || guests < 1)
+        {
+            Console.WriteLine("Ogiltigt antal personer");
+            return;
+        }
+
+        if (bookingDb.UpdateGuests(bookingId, selectedCustomer.Id, guests))
+        {
+            Console.WriteLine("Antal personer är ändrat");
+        }
+        else
+        {
+            Console.WriteLine("Ändringen nekades. Rummet rymmer inte så många, eller så tillhör bokningen inte kunden");
+        }
+    }
+
     private bool SelectCustomer()
     {
         ShowCustomers();
@@ -190,6 +231,12 @@ public class Menu
         if (name == "" || email == "" || tele == "")
         {
             Console.WriteLine("Du missade att fylla i alla fält");
+            return;
+        }
+
+        if (!email.Contains("@"))
+        {
+            Console.WriteLine("E-mail måste innehålla @");
             return;
         }
 

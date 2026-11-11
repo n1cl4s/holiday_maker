@@ -106,4 +106,26 @@ public class BookingDb
         return rowsDeleted == 1;
     }
 
+    public bool UpdateGuests(int bookingId, int customerId, int guests)
+    {
+        string sql = """
+        UPDATE Bookings b
+        JOIN Rooms r ON r.id = b.room_id
+        SET b.guests_count = @guests
+        WHERE b.id = @bookingId
+        AND b.customer_id = @customerId
+        AND r.capacity >= @guests;
+        """;
+
+        using MySqlConnection connection = database.OpenConnection();
+        using MySqlCommand command = new MySqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@guests", guests);
+        command.Parameters.AddWithValue("@bookingId", bookingId);
+        command.Parameters.AddWithValue("@customerId", customerId);
+
+        int rowsUpdated = command.ExecuteNonQuery();
+        return rowsUpdated == 1;
+
+    }
+
 }
