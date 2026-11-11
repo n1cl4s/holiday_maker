@@ -97,3 +97,5 @@ from Rooms r
 join Accomodations a on r.accomodation_id = a.id
 join Cities c on a.city_id = c.id;
 
+create user if not exists 'operator'@'%' identified by 'mintchokladglass';
+grant select, insert, update, delete on holiday_maker.* to 'operator'@'%';
