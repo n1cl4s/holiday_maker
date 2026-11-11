@@ -1,6 +1,10 @@
-// En README med instruktioner för att skapa databasen och köra programmet.
-
 # Instruktioner för att skapa databasen
+
+# Det här behöver du
+- .NET 10
+- MySQL 8 som är igång på localhost (jag kör den i Docker)
+- DataGrip
+- Du behöver vara inloggad som root i DataGrip när du kör skripten
 
 ## Skapa databasen i DataGrip
 ### Alternativ 1
@@ -46,23 +50,25 @@
 - Kontrollera att testdata har kommit in
 
 
-
-
 # Instruktioner för att köra programmet
 - Ladda ner från https://github.com/n1cl4s/holiday_maker
-- Starta Virtual Studio Code
+- Starta Visual Studio Code och öppna mappen
 - Öppna terminal och skriv 'dotnet run'
 - För att komma åt databasen så måste du logga in som operator
 - Användarnamn: operator
 - Lösenord: mintchokladglass
 - Mintchokladglass är min favoritsmak. Men väldigt svår att hitta, vilket gör det till ett semi-säkert lösenord.
-- Som operator kan du gör allt, detta för att alla tester ska vara möjliga. Så du är egentligen operator/user.
+- Lösenordet står här för att det är ett testkonto som bara finns i din lokala databas. Det ligger inte i koden utan skrivs in när programmet startar.
+- Som operator kan du göra allt, detta för att alla tester ska vara möjliga. Så du är egentligen operator/user.
 
 
 ## Hur funkar programmet
 - Du har 9 olika alternativ i menyn, om vi inkluderar Avsluta
-- Felaktigt val som siffror som inte finns i menyn eller bokstäver blir Ogitligt val och du kommer tillbaka till menyn
-- I och med det är en kombination av Operator och User. Så kan du både göra saker som visa kunder, visa rum men även göra bokningar och avbokningar
+- Felaktigt val som siffror som inte finns i menyn eller bokstäver blir Ogiltigt val och du kommer tillbaka till menyn
+- I och med att det är en kombination av Operator och User så kan du både göra saker som visa kunder, visa rum men även göra bokningar och avbokningar
+- Vald kund står ovanför menyn
+- Efter varje val trycker du på valfri tangent för att komma tillbaka till menyn
+- Du måste ha valt en kund för att boka, visa bokningar, avboka och ändra antal personer. Söka rum går bra utan kund.
 
 
 ### Registrera en kund
@@ -106,3 +112,25 @@
 
 
 ### Filtrera olika önskemål
+Efter antal personer får du frågor om filter. Du behöver inte använda dem, svara n eller tryck bara enter för att hoppa över.
+1. Måste ha pool? (j/n)
+2. Måste ha restaurang? (j/n)
+3. Max avstånd till strand i meter
+4. Max avstånd till centrum i meter
+5. Sortera på pris eller omdöme? (p/o)
+
+- p visar billigaste rummet först
+- o visar högst omdöme först
+- I listan ser du omdöme, pool, restaurang och avstånd på varje rum, så du kan se att filtren stämmer
+- Tips om du vill se att det fungerar: gör samma sökning som ovan men svara j på pool och restaurang. Då ska bara 2 rum på Hotel Skansen Båstad vara kvar
+
+
+# Filer i projektet
+- Program.cs - inloggning och startar programmet
+- Menu.cs - menyn och allt som skrivs ut och matas in
+- CustomerDb.cs, RoomDb.cs, BookingDb.cs - alla SQL-frågor
+- Customer.cs, Room.cs, Booking.cs - hur en kund, ett rum och en bokning ser ut i koden
+- Database.cs - öppnar kopplingen till databasen
+- sql/create_database.sql - skapar databasen, vyn och operator
+- sql/test_data.sql - testdata
+- sql/holiday_maker.jpg - E/R-diagram
