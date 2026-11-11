@@ -5,12 +5,18 @@ using MySqlConnector;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 Console.WriteLine("Ange användarnamn och lösenord för att få tillgång");
-Console.Write("Andvändarnamn: ");
+Console.Write("Användarnamn: ");
 string user = Console.ReadLine() ?? "";
 Console.Write("Lösenord: ");
 string password = Console.ReadLine() ?? "";
 
-string connectionString = $"Server=localhost;Database=holiday_maker;User ID={user};Password={password};";
+MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder();
+builder.Server = "localhost";
+builder.Database = "holiday_maker";
+builder.UserID = user;
+builder.Password = password;
+
+string connectionString = builder.ConnectionString;
 
 
 try

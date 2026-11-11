@@ -13,18 +13,12 @@ public class RoomDb
     public async Task<List<Room>> GetAll()
     {
         List<Room> rooms = new List<Room>();
-
-        // Joins Accomodations and Cities to get hotel name and city for each room.
-        // Aliases inspired by the book "Prata med data"
-
+        // Reads from the view RoomDetails, which joins Rooms, Accomodations and Cities.
+        
         string sql = """
-        SELECT r.id, a.name AS hotel, c.name AS city, r.rooms_number, r.capacity, r.price_per_night, a.rating
-        FROM Rooms AS r
-        INNER JOIN Accomodations AS a
-        ON r.accomodation_id = a.id
-        INNER JOIN Cities AS c
-        ON a.city_id = c.id
-        ORDER BY a.name, r.rooms_number;
+        SELECT id, hotel, city, rooms_number, capacity, price_per_night, rating
+        FROM RoomDetails
+        ORDER BY hotel, rooms_number;
         """;
 
         await using MySqlConnection connection = await database.OpenConnection();

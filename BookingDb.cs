@@ -75,14 +75,16 @@ public class BookingDb
         await using MySqlDataReader reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            Booking booking = new Booking();
-            booking.Id = reader.GetInt32("id");
-            booking.Hotel = reader.GetString("hotel");
-            booking.RoomNumber = reader.GetInt32("rooms_number");
-            booking.CheckIn = reader.GetDateTime("booking_start");
-            booking.CheckOut = reader.GetDateTime("booking_end");
-            booking.Guests = reader.GetInt32("guests_count");
-            booking.TotalPrice = reader.GetInt32("total_price");
+                       Booking booking = new Booking
+            {
+                Id = reader.GetInt32("id"),
+                Hotel = reader.GetString("hotel"),
+                RoomNumber = reader.GetInt32("rooms_number"),
+                CheckIn = reader.GetDateTime("booking_start"),
+                CheckOut = reader.GetDateTime("booking_end"),
+                Guests = reader.GetInt32("guests_count"),
+                TotalPrice = reader.GetInt32("total_price")
+            };
             bookings.Add(booking);
 
         }

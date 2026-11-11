@@ -20,11 +20,13 @@ public class CustomerDb
     
         while (await reader.ReadAsync())
         {
-            Customer customer = new Customer();
-            customer.Id = reader.GetInt32("id");
-            customer.Name = reader.GetString("name");
-            customer.Email = reader.GetString("email");
-            customer.Tele = reader.GetString("tele");
+            Customer customer = new Customer
+            {
+                Id = reader.GetInt32("id"),
+                Name = reader.GetString("name"),
+                Email = reader.GetString("email"),
+                Tele = reader.GetString("tele")
+            };
             customers.Add(customer);
         }
         return customers;
@@ -46,12 +48,14 @@ public class CustomerDb
             return null;
         }
 
-        Customer customer = new Customer();
-        customer.Id = reader.GetInt32("id");
-        customer.Name = reader.GetString("name");
-        customer.Email = reader.GetString("email");
-        customer.Tele = reader.GetString("tele");
-        return customer;
+            Customer customer = new Customer
+            {
+                Id = reader.GetInt32("id"),
+                Name = reader.GetString("name"),
+                Email = reader.GetString("email"),
+                Tele = reader.GetString("tele")
+            };
+            return customer;
     }
 
     public async Task<int> Add(string name, string  email, string tele)
