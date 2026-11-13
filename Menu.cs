@@ -1,5 +1,4 @@
 using MySqlConnector;
-
 public class Menu
 {
     private readonly CustomerDb customerDb;
@@ -14,12 +13,10 @@ public class Menu
         bookingDb = new BookingDb(database);
     }
 
-    // Shows the main menu until the user chooses to exit.
     public async Task Run()
     {
         while (true)
         {
-            // Clears the screen and the scroll history before the menu is shown.
             Console.Clear();
             Console.Write("\x1b[3J");
 
@@ -46,14 +43,12 @@ public class Menu
 
             string choice = Console.ReadLine() ?? "";
 
-            // Clears the menu so only the result of the choice is shown.
             Console.Clear();
             Console.Write("\x1b[3J");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("## Holiday Maker ## \n");
             Console.ResetColor();
 
-            // Catches database errors so the program does not crash, for example if the database is down.
             try
             {
                 if (choice == "1")
@@ -64,8 +59,6 @@ public class Menu
 
                 else if (choice == "3")
                 {
-                    // The user gets right back to the start menu when the customer is picked.
-                    // The menu shows which one is chosen.
                     if (await SelectCustomer())
                         continue;
                 }
@@ -96,7 +89,6 @@ public class Menu
                 Console.WriteLine("\nNågot gick fel i kontakten med databasen. Kontrollera att databasen är igång och försök igen.");
             }
 
-            // Stops the screen so the user can see what happened after their choice.
             Console.Write("\nTryck på valfri tangent för att fortsätta...");
             Console.ReadKey(true);
         }
@@ -122,7 +114,6 @@ public class Menu
         }
     }
 
-    // Shows all bookings for the selected customer.
     private async Task ShowBookings()
     {
         if (selectedCustomer == null)
@@ -146,7 +137,6 @@ public class Menu
         }
     }
 
-    // Cancels one of the selected customer's bookings.
     private async Task CancelBooking()
     {
         if (selectedCustomer == null)
@@ -242,6 +232,7 @@ public class Menu
         Console.Write("Telefonnummer: ");
         string tele = Console.ReadLine() ?? "";
 
+
         if (name == "" || email == "" || tele == "")
         {
             Console.WriteLine("Du missade att fylla i alla fält");
@@ -254,11 +245,10 @@ public class Menu
             return;
         }
 
-        // The database does not allow two customers with the same email or phone.
-        // The try/catch takes care of it if it happens
 
         int newCustomerId;
 
+        // The database does not allow two customers with the same email or phone.
         try
         {
             newCustomerId = await customerDb.Add(name, email, tele);
@@ -324,7 +314,6 @@ public class Menu
         Console.Write("Max avstånd till centrum i meter (Enter = inget krav): ");
         int.TryParse(Console.ReadLine(), out int maxCentrum);
 
-        // Anything other than "o" sorts on price.
         Console.Write("Sortera på pris eller omdöme? (p/o): ");
         string sortBy = Console.ReadLine() == "o" ? "rating" : "price";
 
@@ -335,6 +324,7 @@ public class Menu
             Console.WriteLine("\nInga lediga rum hittades");
             return;
         }
+
 
         Console.WriteLine();
         for (int i = 0; i < rooms.Count; i++)
@@ -366,6 +356,7 @@ public class Menu
         }
 
         Room selectedRoom = rooms[roomChoice - 1];
+
 
         // Check availability again right before saving.
         if (!await bookingDb.BookableRoom(selectedRoom.Id, checkIn, checkOut))

@@ -1,3 +1,4 @@
+
 public record Booking
 {
     public int Id { get; init; }

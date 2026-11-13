@@ -1,6 +1,5 @@
 using MySqlConnector;
 
-// Handles all SQL queries for rooms.
 public class RoomDb
 {
     private readonly Database database;
@@ -13,7 +12,6 @@ public class RoomDb
     public async Task<List<Room>> GetAll()
     {
         List<Room> rooms = new List<Room>();
-        // Reads from the view RoomDetails, which joins Rooms, Accomodations and Cities.
         
         string sql = """
         SELECT id, hotel, city, rooms_number, capacity, price_per_night, rating
@@ -47,9 +45,9 @@ public class RoomDb
         bool hasPool, bool hasRestaurant, int maxBeach, int maxCentrum, string sortBy)
     {
         List<Room> rooms = new List<Room>();
-
-        // Sorts on rating (highest first) when sortBy is 'rating', otherwise on price (lowest first).
-        // Price is also used to order rooms with the same rating.
+        // The filters are optional. If a filter is not chosen (0) that line is always true.
+        // NOT IN removes all rooms that already have a booking during the period.
+        // Sorts on rating if that is chosen, otherwise on price.
         string sql = """
         SELECT id, hotel, city, rooms_number, capacity, price_per_night, rating,
                pool, restaurant, distance_to_beach, distance_to_centrum
@@ -72,6 +70,7 @@ public class RoomDb
 
         await using MySqlConnection connection = await database.OpenConnection();
         using MySqlCommand command = new MySqlCommand(sql, connection);
+        
         command.Parameters.AddWithValue("@city", city);
         command.Parameters.AddWithValue("@guests", guests);
         command.Parameters.AddWithValue("@checkIn", checkIn);

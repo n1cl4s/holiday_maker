@@ -1,5 +1,4 @@
 using MySqlConnector;
-
 public class BookingDb
 {
     private readonly Database database;
@@ -11,6 +10,8 @@ public class BookingDb
 
     public async Task<bool> BookableRoom(int roomId, DateTime checkIn, DateTime checkOut)
     {
+        // A booking overlaps if it starts before our check-out and ends after our check-in.
+        // The check-out day is free since we use < and > and not <= and >=.
         string sql = """
         SELECT COUNT(*)
         FROM Bookings
@@ -52,10 +53,11 @@ public class BookingDb
         return (int)command.LastInsertedId;
     }
 
-    
+
 
     public async Task<List<Booking>> GetByCustomer(int customerId)
     {
+        // The total price is not saved in the database. It is nights * price per night.
         string sql = """
         SELECT b.id, a.name AS hotel, r.rooms_number, b.booking_start, b.booking_end, b.guests_count,
                DATEDIFF(b.booking_end, b.booking_start) * r.price_per_night AS total_price
@@ -93,6 +95,7 @@ public class BookingDb
 
     public async Task<bool> Delete(int bookingId, int customerId)
     {
+        // Customer id is also checked, so only the selected customer's bookings can be deleted.
         string sql = """
         DELETE FROM Bookings
         WHERE id = @bookingId
@@ -110,6 +113,7 @@ public class BookingDb
 
     public async Task<bool> UpdateGuests(int bookingId, int customerId, int guests)
     {
+        // Only updates if the new number of guests fits in the room.
         string sql = """
         UPDATE Bookings b
         JOIN Rooms r ON r.id = b.room_id

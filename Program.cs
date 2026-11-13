@@ -1,8 +1,6 @@
 ﻿
 using MySqlConnector;
 
-// Makes Swedish characters (å, ä, ö) display correctly in the console.
-Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 Console.WriteLine("Ange användarnamn och lösenord för att få tillgång");
 Console.Write("Användarnamn: ");

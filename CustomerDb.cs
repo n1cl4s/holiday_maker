@@ -1,6 +1,5 @@
 using MySqlConnector;
 
-// Handles all SQL queries for the Customers table.
 public class CustomerDb
 {
     private readonly Database database;
@@ -34,11 +33,11 @@ public class CustomerDb
 
    
     
-     // Returns null if no customer with the given id exists.
     public async Task<Customer?> GetById(int id)
     {
         await using MySqlConnection connection = await database.OpenConnection();
         using MySqlCommand command = new MySqlCommand("SELECT id, name, email, tele FROM Customers WHERE id = @id;", connection);
+        
         command.Parameters.AddWithValue("@id", id);
         await using MySqlDataReader reader = await command.ExecuteReaderAsync();
 

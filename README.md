@@ -6,6 +6,7 @@
 - DataGrip
 - Du behöver vara inloggad som root i DataGrip när du kör skripten
 
+
 ## Skapa databasen i DataGrip
 ### Alternativ 1
 - Kör sql/create_database.sql med DataGrip
@@ -27,7 +28,6 @@
 
 
 ## Lägga till testdata
-
 ### Alternativ 1
 - Kör sql/test_data.sql med DataGrip
 - Programmet öppnar en konsol med skriptet
@@ -50,13 +50,12 @@
 - Kontrollera att testdata har kommit in
 
 
+
 # Instruktioner för att köra programmet
 - Ladda ner från https://github.com/n1cl4s/holiday_maker
 - Starta Visual Studio Code och öppna mappen
 - Öppna terminal och skriv 'dotnet run'
-- För att komma åt databasen så måste du logga in som operator
-- Användarnamn: operator
-- Lösenord: mintchokladglass
+- För att komma åt databasen så måste du logga in som operator, uppgifter finns i en seperat text-fil på learnpoint
 - Mintchokladglass är min favoritsmak. Men väldigt svår att hitta, vilket gör det till ett semi-säkert lösenord.
 - Lösenordet står här för att det är ett testkonto som bara finns i din lokala databas. Det ligger inte i koden utan skrivs in när programmet startar.
 - Som operator kan du göra allt, detta för att alla tester ska vara möjliga. Så du är egentligen operator/user.
